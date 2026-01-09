@@ -1,39 +1,37 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-
-name: Python application
+name: Build Windows Exe
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-permissions:
-  contents: read
+  workflow_dispatch: # Allows you to run this manually from the Actions tab
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: windows-latest  # IMPORTANT: We must use Windows to build a Windows .exe
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        python-version: "3.10"
-    - name: Install dependencies
+        python-version: '3.10' 
+
+    - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Lint with flake8
+        pip install pyinstaller
+        # This installs PyQt6, vobject, etc. from your file
+        if (Test-Path requirements.txt) { pip install -r requirements.txt }
+
+    - name: Build with PyInstaller
+      # This is the same command we used locally, customized for the build server
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
-      run: |
-        pytest
+        pyinstaller --noconsole --onefile --clean --name="GoogleTakeoutViewer" --collect-all vobject main.py
+
+    - name: Upload Artifact
+      # This step saves the .exe so you can download it
+      uses: actions/upload-artifact@v4
+      with:
+        name: GoogleTakeoutViewer-App
+        path: dist/GoogleTakeoutViewer.exe
