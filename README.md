@@ -68,7 +68,7 @@ The app is built with **PyQt6**, supports large archives, and aims to stay respo
 
 ## Tech Stack
 
-- **Language:** Python 3.8+
+- **Language:** Python 3.10+
 - **GUI:** PyQt6
 - **Parsing:**
   - `vobject` for `.ics` and `.vcf`
